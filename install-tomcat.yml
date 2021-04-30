@@ -2,63 +2,65 @@
 - hosts: localhost
   become: true
   gather_facts: true
-
   tasks:
     
   - name: install JDK 11
     apt:
       name: openjdk-11-jdk
       state: present
-
+      
   - name: add tomcat group
     group:
       name: tomcat
-
+      
   - name: add tomcat user
     user:
       name: tomcat
       group: tomcat
       home: /user/share/tomcat
       createhome: no
-
+      
   - name: create /opt/tomcat directory
     file:
       path: /opt/tomcat
       state: directory
-      mode: 0755
-
+      mode: 0775
+      
   - name: download & unarchive
     unarchive:
       src:  https://archive.apache.org/dist/tomcat/tomcat-10/v10.0.5/bin/apache-tomcat-10.0.5.tar.gz
       dest: /opt/tomcat
       remote_src: yes
       extra_opts: [--strip-components=1]
-
+      
   - name: Change ownership
     file:
       path: /opt/tomcat
       owner: tomcat
       group: tomcat
-      mode: "u+rwx,g+rx,o=rx"
+      mode: "u+rwx,g+rwx,o=rx"
       recurse: yes
       state: directory
-
+      
   - name: Copy Tomcat service from local to remote
     copy:
        src: tomcat.service
        dest: /etc/systemd/system/
        mode: 0755
-
+ 
   - name: Copy to Tomcat Users Setting 
     copy:
        src: tomcat-users.xml.j2
        dest: /opt/tomcat/conf/tomcat-users.xml
        mode: 0755
+       
+  - name: Delete default files
+    shell: rm -rf /opt/tomcat/webapps/*
 
   - name: Download war file from source
     get_url:
       url: https://tomcat.apache.org/tomcat-6.0-doc/appdev/sample/sample.war 
-      dest: /opt/tomcat/webapps
+      dest: /opt/tomcat/webapps/
       mode: 0755 
 
   - name: Start and enable Tomcat service
