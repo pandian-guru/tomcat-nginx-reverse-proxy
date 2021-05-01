@@ -58,10 +58,7 @@
     shell: rm -rf /opt/tomcat/webapps/*
 
   - name: Download war file from source
-    get_url:
-      url: https://tomcat.apache.org/tomcat-6.0-doc/appdev/sample/sample.war 
-      dest: /opt/tomcat/webapps/
-      mode: 0755 
+    shell: gsutil cp gs://demo-app-tomcat-deployment/ROOT.war /opt/tomcat/webapps/
 
   - name: Start and enable Tomcat service
     systemd:
